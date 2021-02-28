@@ -75,9 +75,7 @@ public:
     }
     int sc_regSet(int reg, int value)
     {
-        if (reg == OVERLOAD
-            || reg == ZERO_DEL || reg == OUT_OF_BORDER
-            || reg == IGNR_PULSES || reg == WRONG_COMMAND) {
+        if (reg == OVERLOAD || reg == ZERO_DEL || reg == OUT_OF_BORDER || reg == IGNR_PULSES || reg == WRONG_COMMAND) {
             if (value == 1) {
                 flag |= (1 << reg);
                 return 0;
@@ -90,9 +88,7 @@ public:
     }
     int sc_regGet(int reg, int* value)
     {
-        if (reg == OVERLOAD
-            || reg == ZERO_DEL || reg == OUT_OF_BORDER
-            || reg == IGNR_PULSES || reg == WRONG_COMMAND) {
+        if (reg == OVERLOAD || reg == ZERO_DEL || reg == OUT_OF_BORDER || reg == IGNR_PULSES || reg == WRONG_COMMAND) {
             *value = (flag >> reg) & 1;
             return 0;
         }
@@ -100,10 +96,7 @@ public:
     }
     int sc_commandEncode(int command, int operand, int* value)
     {
-        if (command == 10 || command == 11 || command == 20 || command == 21
-            || (command >= 30 && command <= 33)
-            || (command >= 40 && command <= 43)
-            || (command >= 51 && command <= 76)) {
+        if (command == 10 || command == 11 || command == 20 || command == 21 || (command >= 30 && command <= 33) || (command >= 40 && command <= 43) || (command >= 51 && command <= 76)) {
             if (operand > 0 && operand < 128) {
                 *value = (command << 7) | operand;
                 return 0;
@@ -124,10 +117,7 @@ public:
         if (command_sign == 0) {
             temp_command = (value >> 7) & 0x7F;
             temp_operand = value & 0x7F;
-            if (temp_command == 10 || temp_command == 11 || temp_command == 20 || temp_command == 21
-                || (temp_command >= 30 && temp_command <= 33)
-                || (temp_command >= 40 && temp_command <= 43)
-                || (temp_command >= 51 && temp_command <= 76)) {
+            if (temp_command == 10 || temp_command == 11 || temp_command == 20 || temp_command == 21 || (temp_command >= 30 && temp_command <= 33) || (temp_command >= 40 && temp_command <= 43) || (temp_command >= 51 && temp_command <= 76)) {
                 if (temp_operand > 0 && temp_operand < 128) {
                     *command = temp_command;
                     *operand = temp_operand;

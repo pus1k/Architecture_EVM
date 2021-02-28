@@ -1,5 +1,7 @@
 #include "lab2/simple_computer.h"
 #include "lab3/myTerm.h"
+#include "lab4/myBigChars.h"
+#include <iomanip>
 
 int main()
 {
@@ -12,18 +14,32 @@ int main()
     SC.sc_regSet(WRONG_COMMAND, 1);
     if (mt_getscreensize(&rows, &cols) == 0) {
         if (rows >= 16 && cols >= 10) {
-            cout << "Memory" << endl;
-            for (int i = 0, k = 0; i < 10; i++) {
+            bc_box(2, 1, 12, 62);
+            mt_gotoXY(2, 30);
+            cout << " Memory " << endl;
+            for (int i = 0, x = 3, y = 2, k = 0; i < 10; i++) {
                 for (int j = 0; j < 10; j++) {
-                    mt_gotoXY(i + 3, j + 1);
+                    mt_gotoXY(x, y);
                     if (SC.sc_memoryGet((i * j), &k) == 0)
-                        cout << k << " ";
+                        cout << "+" << std::setw(4) << std::setfill('0') << k << " ";
+                    y += 6;
                 }
+                x++, y = 2;
             }
-            mt_gotoXY(2, 13);
-            cout << "Flags";
+            bc_box(2, 63, 3, 22);
+            mt_gotoXY(2, 67);
+            cout << " accumulator ";
+            bc_box(5, 63, 3, 22);
+            mt_gotoXY(5, 64);
+            cout << " instructionCounter ";
+            bc_box(8, 63, 3, 22);
+            mt_gotoXY(8, 68);
+            cout << " Operation ";
+            bc_box(11, 63, 3, 22);
+            mt_gotoXY(11, 70);
+            cout << " Flags ";
             int value = -1;
-            mt_gotoXY(3, 13);
+            mt_gotoXY(12, 69);
             if (SC.sc_regGet(OVERLOAD, &value) == 0) {
                 if (value == 1) {
                     cout << "P ";
@@ -54,14 +70,28 @@ int main()
                 }
             }
             value = -1;
-            mt_gotoXY(2, 24);
-            cout << "Keys";
-            mt_gotoXY(3, 24);
-            cout << "s - save";
-            mt_gotoXY(4, 24);
+            bc_box(14, 1, 10, 46);
+            //
+            bc_box(14, 47, 10, 38);
+            mt_gotoXY(14, 48);
+            cout << " Keys: ";
+            mt_gotoXY(15, 48);
             cout << "l - load";
-            mt_gotoXY(13, 1);
+            mt_gotoXY(16, 48);
+            cout << "s - save";
+            mt_gotoXY(17, 48);
+            cout << "r - run";
+            mt_gotoXY(18, 48);
+            cout << "t - step";
+            mt_gotoXY(19, 48);
+            cout << "i - reset";
+            mt_gotoXY(20, 48);
+            cout << "F5 - accumulator";
+            mt_gotoXY(21, 48);
+            cout << "F6 - instructionCounter";
+            mt_gotoXY(26, 1);
         }
+
+        return 0;
     }
-    return 0;
 }

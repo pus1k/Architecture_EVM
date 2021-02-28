@@ -10,25 +10,6 @@
 using std::cout;
 using std::endl;
 
-/*
-"\033[39m\\033[39m - Reset colour"
-"\\033[2K - Clear Line"
-"\\033[<L>;<C>H OR \\033[<L>;<C>f puts the cursor at line L and column C."
-"\\033[<N>A Move the cursor up N lines"
-"\\033[<N>B Move the cursor down N lines"
-"\\033[<N>C Move the cursor forward N columns"
-"\\033[<N>D Move the cursor backward N columns"
-"\\033[2J Clear the screen, move to (0,0)"
-"\\033[K Erase to end of line"
-"\\033[s Save cursor position"
-"\\033[u Restore cursor position"
-
-"\\033[4m  Underline on"
-"\\033[24m Underline off"
-"\\033[1m  Bold on"
-"\\033[21m Bold off"
-*/
-
 enum colors {
     black = 30,
     red = 31,
@@ -81,3 +62,22 @@ int mt_setdefaultcolor()
     return 0;
 }
 #endif
+
+/*
+"\033[39m\\033[39m - Reset colour"
+"\\033[2K - Clear Line"
+"\\033[<L>;<C>H OR \\033[<L>;<C>f puts the cursor at line L and column C."
+"\\033[<N>A Move the cursor up N lines"
+"\\033[<N>B Move the cursor down N lines"
+"\\033[<N>C Move the cursor forward N columns"
+"\\033[<N>D Move the cursor backward N columns"
+"\\033[2J Clear the screen, move to (0,0)"
+"\\033[K Erase to end of line"
+"\\033[s Save cursor position"
+"\\033[u Restore cursor position"
+
+"\\033[4m  Underline on"
+"\\033[24m Underline off"
+"\\033[1m  Bold on"
+"\\033[21m Bold off"
+*/
