@@ -20,6 +20,7 @@ enum colors {
     lightblue = 36,
     white = 37,
 };
+
 int mt_clrscr()
 {
     cout << "\033[H\033[J";
@@ -37,13 +38,13 @@ int mt_getscreensize(int* rows, int* cols)
         *rows = w.ws_row;
         *cols = w.ws_col;
     } else
-        return -1;
+        return 1;
     return 0;
 }
 int mt_setfgcolor(colors clr)
 {
     if ((int)clr < 30 || (int)clr > 37) {
-        return -1;
+        return 1;
     }
     cout << "\033[" << (int)clr << "m";
     return 0;
@@ -51,7 +52,7 @@ int mt_setfgcolor(colors clr)
 int mt_setbgcolor(colors clr)
 {
     if ((int)clr < 30 || (int)clr > 37) {
-        return -1;
+        return 1;
     }
     cout << "\033[" << ((int)clr + 10) << "m";
     return 0;

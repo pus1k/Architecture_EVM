@@ -12,15 +12,18 @@ int main()
     SC.sc_regSet(OUT_OF_BORDER, 1);
     SC.sc_regSet(IGNR_PULSES, 1);
     SC.sc_regSet(WRONG_COMMAND, 1);
+    for (int i = 0; i < 100; i++) {
+        SC.sc_memorySet(i, (i + 9900));
+    }
     if (mt_getscreensize(&rows, &cols) == 0) {
-        if (rows >= 16 && cols >= 10) {
+        if (rows >= 25 && cols >= 84) {
             bc_box(2, 1, 12, 62);
             mt_gotoXY(2, 30);
             cout << " Memory " << endl;
             for (int i = 0, x = 3, y = 2, k = 0; i < 10; i++) {
                 for (int j = 0; j < 10; j++) {
                     mt_gotoXY(x, y);
-                    if (SC.sc_memoryGet((i * j), &k) == 0)
+                    if (SC.sc_memoryGet(((i * 10) + j), &k) == 0)
                         cout << "+" << std::setw(4) << std::setfill('0') << k << " ";
                     y += 6;
                 }
@@ -70,8 +73,10 @@ int main()
                 }
             }
             value = -1;
+
             bc_box(14, 1, 10, 46);
-            //
+            SC.sc_memoryGet(65, &value);
+            print_mem(value);
             bc_box(14, 47, 10, 38);
             mt_gotoXY(14, 48);
             cout << " Keys: ";
