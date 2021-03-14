@@ -19,6 +19,7 @@ enum colors {
     pink = 35,
     lightblue = 36,
     white = 37,
+    def = 39
 };
 
 int mt_clrscr()

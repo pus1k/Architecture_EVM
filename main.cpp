@@ -24,7 +24,7 @@ int main()
                 for (int j = 0; j < 10; j++) {
                     mt_gotoXY(x, y);
                     if (SC.sc_memoryGet(((i * 10) + j), &k) == 0)
-                        cout << "+" << std::setw(4) << std::setfill('0') << k << " ";
+                        printf("+%04x ", k);
                     y += 6;
                 }
                 x++, y = 2;
@@ -76,7 +76,7 @@ int main()
 
             bc_box(14, 1, 10, 46);
             SC.sc_memoryGet(65, &value);
-            print_mem(value);
+            print_mem(value, def, def);
             bc_box(14, 47, 10, 38);
             mt_gotoXY(14, 48);
             cout << " Keys: ";
@@ -96,7 +96,27 @@ int main()
             cout << "F6 - instructionCounter";
             mt_gotoXY(26, 1);
         }
+        // Проверка big char
+        // int value = 0;
+        // bc_getbigcharpos(zero, 0, 0, &value);
+        // cout << value << endl;
+        // bc_setbigcharpos(zero, 0, 0, 0);
+        // bc_printbigchar(zero, 28, 0, white, black);
 
+        // long int temp[4];
+        // long int temp2[2];
+        // temp[0] = zero[0], temp[1] = zero[1];
+        // temp[2] = two[0], temp[3] = two[1];
+        // bc_bigcharwrite("test.txt", temp, 2);
+
+        // temp[0] = one[0], temp[1] = one[1];
+        // temp[2] = three[0], temp[3] = three[1];
+        // bc_bigcharread("test.txt", temp, 2, &value);
+
+        // temp2[0] = temp[2], temp2[1] = temp[3];
+        // bc_printbigchar(F, 38, 0, white, black);
+        // bc_printbigchar(temp2, 38, 10, white, black);
+        //
         return 0;
     }
 }
