@@ -1,22 +1,17 @@
 #include "lab2/simple_computer.h"
 #include "lab3/myTerm.h"
 #include "lab4/myBigChars.h"
+// #include "lab5/myReadKey.h"
 #include <iomanip>
 
 int main()
 {
     SimpleComputer SC;
     int rows, cols;
-    SC.sc_regSet(OVERLOAD, 1);
-    SC.sc_regSet(ZERO_DEL, 1);
-    SC.sc_regSet(OUT_OF_BORDER, 1);
-    SC.sc_regSet(IGNR_PULSES, 1);
-    SC.sc_regSet(WRONG_COMMAND, 1);
-    for (int i = 0; i < 100; i++) {
-        SC.sc_memorySet(i, (i + 9900));
-    }
+    for (int i = 0; i < 100; i++)
+        SC.sc_memorySet(i, 0);
     if (mt_getscreensize(&rows, &cols) == 0) {
-        if (rows >= 25 && cols >= 84) {
+        if (rows >= 24 && cols >= 80) {
             bc_box(2, 1, 12, 62);
             mt_gotoXY(2, 30);
             cout << " Memory " << endl;
@@ -45,35 +40,30 @@ int main()
             mt_gotoXY(12, 69);
             if (SC.sc_regGet(OVERLOAD, &value) == 0) {
                 if (value == 1) {
-                    cout << "P ";
+                    cout << "P ", value = 0;
                 }
             }
-            value = -1;
             if (SC.sc_regGet(ZERO_DEL, &value) == 0) {
                 if (value == 1) {
-                    cout << "O ";
+                    cout << "O ", value = 0;
                 }
             }
-            value = -1;
             if (SC.sc_regGet(OUT_OF_BORDER, &value) == 0) {
                 if (value == 1) {
-                    cout << "M ";
+                    cout << "M ", value = 0;
                 }
             }
-            value = -1;
             if (SC.sc_regGet(IGNR_PULSES, &value) == 0) {
                 if (value == 1) {
-                    cout << "T ";
+                    cout << "T ", value = 0;
                 }
             }
             value = -1;
             if (SC.sc_regGet(WRONG_COMMAND, &value) == 0) {
                 if (value == 1) {
-                    cout << "E ";
+                    cout << "E ", value = 0;
                 }
             }
-            value = -1;
-
             bc_box(14, 1, 10, 46);
             SC.sc_memoryGet(65, &value);
             print_mem(value, def, def);
@@ -96,27 +86,6 @@ int main()
             cout << "F6 - instructionCounter";
             mt_gotoXY(26, 1);
         }
-        // Проверка big char
-        // int value = 0;
-        // bc_getbigcharpos(zero, 0, 0, &value);
-        // cout << value << endl;
-        // bc_setbigcharpos(zero, 0, 0, 0);
-        // bc_printbigchar(zero, 28, 0, white, black);
-
-        // long int temp[4];
-        // long int temp2[2];
-        // temp[0] = zero[0], temp[1] = zero[1];
-        // temp[2] = two[0], temp[3] = two[1];
-        // bc_bigcharwrite("test.txt", temp, 2);
-
-        // temp[0] = one[0], temp[1] = one[1];
-        // temp[2] = three[0], temp[3] = three[1];
-        // bc_bigcharread("test.txt", temp, 2, &value);
-
-        // temp2[0] = temp[2], temp2[1] = temp[3];
-        // bc_printbigchar(F, 38, 0, white, black);
-        // bc_printbigchar(temp2, 38, 10, white, black);
-        //
-        return 0;
     }
+    return 0;
 }
