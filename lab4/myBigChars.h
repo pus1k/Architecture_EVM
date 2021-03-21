@@ -22,6 +22,9 @@ using std::string;
 #define LINE_HOR "q"
 #define CUBE "a"
 
+int instructionCounter = 0x0;
+int accumulator = 0x0;
+
 long int zero[2] = { 0b11111111110000111100001111000011, 0b11000011110000111100001111111111 };
 long int one[2] = { 0b11111111000110000001100000011000, 0b00011000000111100001110000011000 };
 long int two[2] = { 0b11111111000001100000110000011000, 0b00110000011000001100001101111110 };
@@ -108,7 +111,7 @@ void print_mem(int value, colors fc, colors bc)
 {
     int temp = value;
     int del = 16;
-    int y = 9;
+    int y = 11;
     int dig[6] = { -1 };
     bc_printbigchar(plus, 15, 2, fc, bc);
     int i = 0;
@@ -118,6 +121,14 @@ void print_mem(int value, colors fc, colors bc)
         i++;
     }
     dig[i] = temp;
+    if (i < 3 && i >= 0) {
+        int j = 3 - i;
+        while (j > 0) {
+            bc_printbigchar(zero, 15, y, fc, bc);
+            y += 9;
+            j--;
+        }
+    }
     while (i >= 0) {
         switch (dig[i]) {
         case (0):
