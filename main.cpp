@@ -6,6 +6,8 @@ int main()
     if (mt_getscreensize(&rows, &cols) == 0) {
         if (rows >= 26 && cols >= 84) {
             _init_();
+            for (int i = 0; i < N; i++)
+                sc_memorySet(i, 9900 + i);
             while (key != EXIT) {
                 _print_screen_();
                 rk_readkey(&key);
@@ -27,6 +29,9 @@ int main()
                     break;
                 case (key_save):
                     _SAVE_();
+                    break;
+                case (key_enter):
+                    _ENTER_();
                     break;
                 case (key_run):
                     break;

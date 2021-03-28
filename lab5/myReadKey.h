@@ -24,6 +24,7 @@ enum keys {
     key_left,
     key_right,
     key_other,
+    key_enter,
     EXIT
 };
 
@@ -93,6 +94,8 @@ int rk_readkey(enum keys* key)
         *key = key_f5;
     } else if (!strcmp(buf, "\033[17~")) {
         *key = key_f6;
+    } else if (buf[0] == 'f') {
+        *key = key_enter;
     } else if (buf[0] == 'l') {
         *key = key_load;
     } else if (buf[0] == 's') {
