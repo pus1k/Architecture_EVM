@@ -25,6 +25,7 @@ enum keys {
     key_right,
     key_other,
     key_enter,
+    key_signal,
     EXIT
 };
 
@@ -45,11 +46,11 @@ int rk_mytermrestore()
     }
     return 0;
 }
+
 int rk_mytermregime(int regime, int vtime, int vmin, int echo, int sigint)
 {
-    struct termios new_settings;
+    struct termios new_settings = stored_settings;
     rk_mytermsave();
-    new_settings = stored_settings;
     if (regime == 1) {
         new_settings.c_lflag &= (~ICANON);
         if (sigint == 1) {
@@ -94,7 +95,7 @@ int rk_readkey(enum keys* key)
         *key = key_f5;
     } else if (!strcmp(buf, "\033[17~")) {
         *key = key_f6;
-    } else if (buf[0] == 'f') {
+    } else if (buf[0] == '\n') {
         *key = key_enter;
     } else if (buf[0] == 'l') {
         *key = key_load;
@@ -106,8 +107,10 @@ int rk_readkey(enum keys* key)
         *key = key_step;
     } else if (buf[0] == 'i') {
         *key = key_reset;
-    } else if (buf[0] == 'q') {
+    } else if ((int)buf[0] == 27) {
         *key = EXIT;
+    } else if (buf[0] == 'a') {
+        *key = key_signal;
     } else {
         *key = key_other;
     }

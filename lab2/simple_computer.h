@@ -10,17 +10,30 @@
 using std::cout;
 
 #define N 100
-#define OVERLOAD 1 // P
-#define ZERO_DEL 2 //  O
-#define OUT_OF_BORDER 4 // M
-#define IGNR_PULSES 8 // T
-#define WRONG_COMMAND 16 // E
+#define OVERLOAD 0x1 // P
+#define ZERO_DEL 0x2 //  O
+#define OUT_OF_BORDER 0x4 // M
+#define IGNR_PULSES 0x8 // T
+#define WRONG_COMMAND 0x10 // E
+#define IGNR_TIMER 0x20
 
 int memory[N];
-int flag;
+int flag = 0;
+int temp = 0;
+
+int sc_init()
+{
+    for (int i = 0; i < N; i++)
+        memory[i] = 0;
+    flag = 0;
+    temp = 0;
+    return 0;
+}
 int sc_regSet(int reg, int value)
 {
-    if (reg == OVERLOAD || reg == ZERO_DEL || reg == OUT_OF_BORDER || reg == IGNR_PULSES || reg == WRONG_COMMAND) {
+    if (reg == OVERLOAD || reg == ZERO_DEL
+        || reg == OUT_OF_BORDER || reg == IGNR_PULSES
+        || reg == WRONG_COMMAND || reg == IGNR_TIMER) {
         if (value == 1) {
             flag |= (1 << reg);
             return 0;
@@ -33,18 +46,13 @@ int sc_regSet(int reg, int value)
 }
 int sc_regGet(int reg, int* value)
 {
-    if (reg == OVERLOAD || reg == ZERO_DEL || reg == OUT_OF_BORDER || reg == IGNR_PULSES || reg == WRONG_COMMAND) {
+    if (reg == OVERLOAD || reg == ZERO_DEL
+        || reg == OUT_OF_BORDER || reg == IGNR_PULSES
+        || reg == WRONG_COMMAND || reg == IGNR_TIMER) {
         *value = (flag >> reg) & 1;
         return 0;
     }
     return 1;
-}
-int sc_init()
-{
-    for (int i = 0; i < N; i++)
-        memory[i] = 0;
-    flag = 0;
-    return 0;
 }
 int sc_memorySet(int address, int value)
 {

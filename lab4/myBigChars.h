@@ -36,6 +36,7 @@ long int seven[2] = { 0b00000011000001100000110000011000, 0b00110000011000001100
 long int eight[2] = { 0b11111111110000111100001111000011, 0b11111111110000111100001111111111 };
 long int nine[2] = { 0b11111111110000001100000011111111, 0b11000011110000111100001111111111 };
 long int plus[2] = { 0b00011000000110000001100011111111, 0b11111111000110000001100000011000 };
+long int minus[2] = { 0b00000000000000000000000011111111, 0b11111111000000000000000000000000 };
 long int A[2] = { 0b01000010010000100100001001111110, 0b01000010010000100010010000011000 };
 long int B[2] = { 0b00111110010000100100001001000010, 0b00111110010000100100001000111110 };
 long int C[2] = { 0b01111110000000100000001000000010, 0b00000010000000100000001001111110 };
@@ -107,82 +108,7 @@ int bc_printbigchar(long int* a, int x, int y, colors fc, colors bc)
     mt_setdefaultcolor();
     return 0;
 }
-void print_mem(int value, colors fc, colors bc)
-{
-    int temp = value;
-    int del = 16;
-    int y = 11;
-    int dig[6] = { -1 };
-    bc_printbigchar(plus, 15, 2, fc, bc);
-    int i = 0;
-    while (temp > del) {
-        dig[i] = temp % del;
-        temp /= del;
-        i++;
-    }
-    dig[i] = temp;
-    if (i < 3 && i >= 0) {
-        int j = 3 - i;
-        while (j > 0) {
-            bc_printbigchar(zero, 15, y, fc, bc);
-            y += 9;
-            j--;
-        }
-    }
-    while (i >= 0) {
-        switch (dig[i]) {
-        case (0):
-            bc_printbigchar(zero, 15, y, fc, bc);
-            break;
-        case (1):
-            bc_printbigchar(one, 15, y, fc, bc);
-            break;
-        case (2):
-            bc_printbigchar(two, 15, y, fc, bc);
-            break;
-        case (3):
-            bc_printbigchar(three, 15, y, fc, bc);
-            break;
-        case (4):
-            bc_printbigchar(four, 15, y, fc, bc);
-            break;
-        case (5):
-            bc_printbigchar(five, 15, y, fc, bc);
-            break;
-        case (6):
-            bc_printbigchar(six, 15, y, fc, bc);
-            break;
-        case (7):
-            bc_printbigchar(seven, 15, y, fc, bc);
-            break;
-        case (8):
-            bc_printbigchar(eight, 15, y, fc, bc);
-            break;
-        case (9):
-            bc_printbigchar(nine, 15, y, fc, bc);
-            break;
-        case (10):
-            bc_printbigchar(A, 15, y, fc, bc);
-            break;
-        case (11):
-            bc_printbigchar(B, 15, y, fc, bc);
-            break;
-        case (12):
-            bc_printbigchar(C, 15, y, fc, bc);
-            break;
-        case (13):
-            bc_printbigchar(D, 15, y, fc, bc);
-            break;
-        case (14):
-            bc_printbigchar(E, 15, y, fc, bc);
-            break;
-        case (15):
-            bc_printbigchar(F, 15, y, fc, bc);
-        }
-        y += 9;
-        i--;
-    }
-}
+
 int bc_setbigcharpos(long int* big, int x, int y, int value)
 {
     if (x < 0 || x > 7 || y < 0 || y > 7) {
