@@ -19,14 +19,12 @@ using std::cout;
 
 int memory[N];
 int flag = 0;
-int temp = 0;
 
 int sc_init()
 {
     for (int i = 0; i < N; i++)
         memory[i] = 0;
     flag = 0;
-    temp = 0;
     return 0;
 }
 int sc_regSet(int reg, int value)
@@ -106,6 +104,7 @@ int sc_regInit()
 
 int sc_commandEncode(int command, int operand, int* value)
 {
+    sc_regSet(WRONG_COMMAND, 0);
     if (command == 10 || command == 11 || command == 20 || command == 21 || (command >= 30 && command <= 33) || (command >= 40 && command <= 43) || (command >= 51 && command <= 76)) {
         if (operand > 0 && operand < 128) {
             *value = (command << 7) | operand;
@@ -122,7 +121,7 @@ int sc_commandDecode(int value, int* command, int* operand)
 {
     int command_sign;
     int temp_command, temp_operand;
-
+    sc_regSet(WRONG_COMMAND, 0);
     command_sign = (value >> 14) & 1;
     if (command_sign == 0) {
         temp_command = (value >> 7) & 0x7F;

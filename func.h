@@ -100,25 +100,6 @@ void clean_input()
     }
 }
 
-void move()
-{
-    int x = 3, y = 2;
-    if (temp == 100)
-        x = 12, y = 56;
-    else {
-        x += temp / 10;
-        y += temp % 10 * 6;
-    }
-    mt_gotoXY(x, y);
-    mt_setbgcolor(white);
-    mt_setfgcolor(black);
-    if (((memory[temp] >> 14) & 1) == 0)
-        printf("+%04x ", memory[temp]);
-    else
-        printf("-%04x ", memory[temp]);
-    mt_setdefaultcolor();
-}
-
 void SAVE()
 {
     string file_name;
@@ -143,22 +124,28 @@ void LOAD()
 
 void F5()
 {
-    sc_memoryGet(temp, &accumulator);
+    int ans;
+    cout << "Enter value for accumulator (-1, 0 <--> 15367): ";
+    cin >> ans;
+    if (ans == -1) {
+        sc_memoryGet(instructionCounter, &accumulator);
+    } else {
+        accumulator = ans;
+    }
     mt_gotoXY(3, 71);
     printf("+%04x ", accumulator);
+    clean_input();
 }
 void F6()
 {
-    instructionCounter = temp;
-    mt_gotoXY(6, 71);
-    printf("+%04x ", instructionCounter);
-    mt_gotoXY(9, 64);
-    cout << "                    ";
-    mt_gotoXY(9, 69);
-    if (((memory[instructionCounter] >> 14) & 1) == 0)
-        printf("+%02d : %02d", (memory[instructionCounter] >> 7) & 0x7f, (memory[instructionCounter]) & 0x7f);
-    else
-        printf("-%02d : %02d", (memory[instructionCounter] >> 7) & 0x7f, (memory[instructionCounter]) & 0x7f);
+    cout << "Enter value for instructionCounter (0 <--> 99): ";
+    cin >> instructionCounter;
+    if (instructionCounter < 0) {
+        instructionCounter = 0;
+    } else if (instructionCounter > 99) {
+        instructionCounter = 99;
+    }
+    clean_input();
 }
 
 void RUN()
@@ -172,12 +159,13 @@ void STEP()
 
 void ENTER()
 {
+    // encode
     int value = 0;
     mt_gotoXY(26, 1);
     cout << "> ";
     cin >> value;
     if (value <= 0x7fff) {
-        if (sc_memorySet(temp, value)) {
+        if (sc_memorySet(instructionCounter, value)) {
             cout << "Error!" << endl;
             sleep(1);
         }
@@ -213,7 +201,9 @@ void _print_once_()
     mt_gotoXY(8, 68);
     cout << " Operation ";
     mt_gotoXY(9, 69);
-    printf("+%02d : %02d", (memory[instructionCounter] >> 7) & 0x7F, memory[instructionCounter] & 0x7F);
+    int command = 0, operand = 0;
+    sc_commandDecode(memory[instructionCounter], &command, &operand);
+    printf("+%02d : %02d", command, operand);
     mt_gotoXY(11, 70);
     cout << " Flags ";
     mt_gotoXY(14, 48);
@@ -241,17 +231,29 @@ void _print_screen_()
         for (int j = 0; j < 10; j++) {
             mt_gotoXY(x, y);
             if (sc_memoryGet(((i * 10) + j), &k) == 0) {
+                if ((i * 10 + j) == instructionCounter) {
+                    mt_setbgcolor(white);
+                    mt_setfgcolor(black);
+                }
                 if (((k >> 14) & 1) == 0)
                     printf("+%04x ", k);
                 else
                     printf("-%04x ", k);
+                mt_setdefaultcolor();
             }
             y += 6;
         }
         x++, y = 2;
     }
-    move();
     int value = 0;
+    mt_gotoXY(6, 71);
+    printf("+%04x ", instructionCounter);
+    mt_gotoXY(9, 64);
+    cout << "                    ";
+    mt_gotoXY(9, 69);
+    int command = 0, operand = 0;
+    sc_commandDecode(memory[instructionCounter], &command, &operand);
+    printf("+%02d : %02d", command, operand);
     mt_gotoXY(12, 69);
     if (sc_regGet(OVERLOAD, &value) == 0) {
         if (value == 1) {
@@ -283,7 +285,7 @@ void _print_screen_()
             value = 0;
         }
     }
-    sc_memoryGet(temp, &value);
+    sc_memoryGet(instructionCounter, &value);
     print_mem(value, def, def);
     mt_gotoXY(25, 1);
     cout << "Input/Output" << endl;
