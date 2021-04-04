@@ -11,88 +11,22 @@ struct itimerval nval, oval;
 void print_mem(int value, colors fc, colors bc)
 {
     int temp = value;
-    int del = 16;
-    int y = 11;
-    int dig[6] = { -1 };
-    if (((value >> 14) & 1) == 0)
-        bc_printbigchar(plus, 15, 2, fc, bc);
-    else
-        bc_printbigchar(minus, 15, 2, fc, bc);
-    int i = 0;
-    while (temp > del) {
-        dig[i] = temp % del;
-        temp /= del;
-        i++;
+    int dig[4];
+    bc_printbigchar(plus, 15, 2, fc, bc);
+    for (int i = 0; i < 4; i++) {
+        dig[i] = 0, dig[i] = temp % 16, temp /= 16;
     }
-    dig[i] = temp;
-    if (i < 3 && i >= 0) {
-        int j = 3 - i;
-        while (j > 0) {
-            bc_printbigchar(zero, 15, y, fc, bc);
-            y += 9;
-            j--;
-        }
-    }
-    while (i >= 0) {
-        switch (dig[i]) {
-        case (0):
-            bc_printbigchar(zero, 15, y, fc, bc);
-            break;
-        case (1):
-            bc_printbigchar(one, 15, y, fc, bc);
-            break;
-        case (2):
-            bc_printbigchar(two, 15, y, fc, bc);
-            break;
-        case (3):
-            bc_printbigchar(three, 15, y, fc, bc);
-            break;
-        case (4):
-            bc_printbigchar(four, 15, y, fc, bc);
-            break;
-        case (5):
-            bc_printbigchar(five, 15, y, fc, bc);
-            break;
-        case (6):
-            bc_printbigchar(six, 15, y, fc, bc);
-            break;
-        case (7):
-            bc_printbigchar(seven, 15, y, fc, bc);
-            break;
-        case (8):
-            bc_printbigchar(eight, 15, y, fc, bc);
-            break;
-        case (9):
-            bc_printbigchar(nine, 15, y, fc, bc);
-            break;
-        case (10):
-            bc_printbigchar(A, 15, y, fc, bc);
-            break;
-        case (11):
-            bc_printbigchar(B, 15, y, fc, bc);
-            break;
-        case (12):
-            bc_printbigchar(C, 15, y, fc, bc);
-            break;
-        case (13):
-            bc_printbigchar(D, 15, y, fc, bc);
-            break;
-        case (14):
-            bc_printbigchar(E, 15, y, fc, bc);
-            break;
-        case (15):
-            bc_printbigchar(F, 15, y, fc, bc);
-        }
-        y += 9;
-        i--;
-    }
+    bc_printbigchar(CHARS[dig[3]], 15, 11, fc, bc);
+    bc_printbigchar(CHARS[dig[2]], 15, 20, fc, bc);
+    bc_printbigchar(CHARS[dig[1]], 15, 29, fc, bc);
+    bc_printbigchar(CHARS[dig[0]], 15, 38, fc, bc);
 }
 
 void clean_input()
 {
     int rows, cols;
     mt_getscreensize(&rows, &cols);
-    for (int i = 26; i <= 27; i++) {
+    for (int i = 26; i <= 30; i++) {
         for (int j = 1; j < cols; j++) {
             mt_gotoXY(i, j);
             cout << " ";
@@ -124,13 +58,16 @@ void LOAD()
 
 void F5()
 {
-    int ans;
-    cout << "Enter value for accumulator (-1, 0 <--> 15367): ";
+    char ans = 'n';
+    cout << "Do you wanna use value from instructionCounter cell (y / n): ";
+    rk_mytermregime(1, 0, 1, 0, 0);
     cin >> ans;
-    if (ans == -1) {
+    rk_mytermrestore();
+    if (ans == 'y') {
         sc_memoryGet(instructionCounter, &accumulator);
     } else {
-        accumulator = ans;
+        cout << "\nEnter value for accumulator (0 <--> 7fff): ";
+        cin >> std::hex >> accumulator;
     }
     mt_gotoXY(3, 71);
     printf("+%04x ", accumulator);
@@ -148,6 +85,7 @@ void F6()
     clean_input();
 }
 
+// DO CPU
 void RUN()
 {
     return;
@@ -159,20 +97,20 @@ void STEP()
 
 void ENTER()
 {
-    // encode
-    int value = 0;
+    int value = 0, temp = 0;
     mt_gotoXY(26, 1);
     cout << "> ";
-    cin >> value;
-    if (value <= 0x7fff) {
-        if (sc_memorySet(instructionCounter, value)) {
-            cout << "Error!" << endl;
+    cin >> std::hex >> value;
+    if (!sc_commandEncode((value >> 7) & 0x7F, value & 0x7F, &temp)) {
+        if (sc_memorySet(instructionCounter, temp)) {
+            cout << "Out of memory border!" << endl;
             sleep(1);
         }
     } else {
-        cout << "Value is not correct!";
+        cout << "Value is not correct!" << endl;
         sleep(1);
     }
+    cout << endl;
     clean_input();
 }
 
@@ -196,14 +134,8 @@ void _print_once_()
     printf("+%04x ", accumulator);
     mt_gotoXY(5, 64);
     cout << " instructionCounter ";
-    mt_gotoXY(6, 71);
-    printf("+%04x ", instructionCounter);
     mt_gotoXY(8, 68);
     cout << " Operation ";
-    mt_gotoXY(9, 69);
-    int command = 0, operand = 0;
-    sc_commandDecode(memory[instructionCounter], &command, &operand);
-    printf("+%02d : %02d", command, operand);
     mt_gotoXY(11, 70);
     cout << " Flags ";
     mt_gotoXY(14, 48);
@@ -253,7 +185,7 @@ void _print_screen_()
     mt_gotoXY(9, 69);
     int command = 0, operand = 0;
     sc_commandDecode(memory[instructionCounter], &command, &operand);
-    printf("+%02d : %02d", command, operand);
+    printf("+%02x : %02x", command, operand);
     mt_gotoXY(12, 69);
     if (sc_regGet(OVERLOAD, &value) == 0) {
         if (value == 1) {

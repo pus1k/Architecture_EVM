@@ -5,16 +5,6 @@
 
 // sc_regSet(IGNR_TIMER, 1);
 
-void _timer_(int signo)
-{
-    int value = 0;
-    sc_regGet(IGNR_TIMER, &value);
-    if (instructionCounter < 99 && !value) {
-        instructionCounter++;
-    }
-}
-void _signal_(int signo);
-
 void _init_()
 {
     srand(time(0));
@@ -22,16 +12,22 @@ void _init_()
     sc_init();
     instructionCounter = 0;
     accumulator = 0;
-    for (int i = 0; i < N; i++)
-        sc_memorySet(i, rand() % 0x3fff + 0);
+    for (int i = 0; i < N; i++) {
+        int value = 0;
+        value = (commands[(rand() % 12 + 0)] << 7) | (rand() % 0b1111111 + 0);
+        sc_memorySet(i, value);
+    }
     _print_box_();
     _print_once_();
-    signal(SIGALRM, _timer_);
-    signal(SIGUSR1, _signal_);
-    nval.it_interval.tv_sec = 1;
-    nval.it_interval.tv_usec = 0;
-    nval.it_value.tv_sec = 1;
-    nval.it_value.tv_usec = 0;
+}
+
+void _timer_(int signo)
+{
+    int value = 0;
+    sc_regGet(IGNR_TIMER, &value);
+    if (instructionCounter < 99 && !value) {
+        instructionCounter++;
+    }
 }
 
 void _signal_(int signo)
@@ -41,6 +37,12 @@ void _signal_(int signo)
 
 void _start_prog_()
 {
+    signal(SIGALRM, _timer_);
+    signal(SIGUSR1, _signal_);
+    nval.it_interval.tv_sec = 1;
+    nval.it_interval.tv_usec = 0;
+    nval.it_value.tv_sec = 1;
+    nval.it_value.tv_usec = 0;
     int value = 0;
     _init_();
     setitimer(ITIMER_REAL, &nval, &oval);

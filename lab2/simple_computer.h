@@ -19,6 +19,18 @@ using std::cout;
 
 int memory[N];
 int flag = 0;
+const int ncommands = 13;
+const int commands[ncommands] = { 0x10, 0x11, 0x20, 0x21, 0x30, 0x31, 0x32, 0x33, 0x40, 0x41, 0x42, 0x43, 0x63 };
+
+int is_command(int value)
+{
+    for (int i = 0; i < ncommands; i++) {
+        if (commands[i] == value) {
+            return 0;
+        }
+    }
+    return 1;
+}
 
 int sc_init()
 {
@@ -105,8 +117,8 @@ int sc_regInit()
 int sc_commandEncode(int command, int operand, int* value)
 {
     sc_regSet(WRONG_COMMAND, 0);
-    if (command == 10 || command == 11 || command == 20 || command == 21 || (command >= 30 && command <= 33) || (command >= 40 && command <= 43) || (command >= 51 && command <= 76)) {
-        if (operand > 0 && operand < 128) {
+    if (!is_command(command)) {
+        if (operand > -1 && operand < 128) {
             *value = (command << 7) | operand;
             return 0;
         } else {
@@ -126,7 +138,7 @@ int sc_commandDecode(int value, int* command, int* operand)
     if (command_sign == 0) {
         temp_command = (value >> 7) & 0x7F;
         temp_operand = value & 0x7F;
-        if (temp_command == 10 || temp_command == 11 || temp_command == 20 || temp_command == 21 || (temp_command >= 30 && temp_command <= 33) || (temp_command >= 40 && temp_command <= 43) || (temp_command >= 51 && temp_command <= 76)) {
+        if (!is_command(temp_command)) {
             if (temp_operand > 0 && temp_operand < 128) {
                 *command = temp_command;
                 *operand = temp_operand;
