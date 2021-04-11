@@ -1,161 +1,141 @@
 #ifndef CPU_H
 #define CPU_H
 
-#include "../lab2/simple_computer.h"
-
-#define READ 10
-#define WRITE 11
-
-#define LOAD 20
-#define STORE 21
-
-#define ADD 30
-#define SUB 31
-#define DIVIDE 32
-#define MUL 33
-
-#define JUMP 40
-#define JNEG 41
-#define JZ 42
-#define HALT 43
-#define JB 44
-#define JC 56
-#define SET 78
-
-int mem_temp[100];
+#include "../func.h"
 
 int ALU(int command, int operand)
 {
-    if (operand > 99) {
+    int value = -1;
+    sc_memoryGet(operand, &value);
+    if (operand > 99 || value == -1) {
         return 1;
     }
-
-    switch (command) {
-    case ADD:
-        if ((accum + ptr_str[operand]) >= 65535) {
-            sc_regSet(OD, 1);
-            break;
+    if (command == 0x30) {
+        if ((accumulator + value) >= 0x9999) {
+            sc_regSet(OVERLOAD, 1);
+            return 1;
         }
-        accum += ptr_str[operand];
-        break;
-    case SUB:
-        if ((accum - ptr_str[operand]) < -65534) {
-            sc_regSet(OD, 1);
-            break;
+        accumulator += value;
+    } else if (command == 0x31) {
+        if ((accumulator - value) < -0x9999) {
+            sc_regSet(OVERLOAD, 1);
+            return 1;
         }
-        accum -= ptr_str[operand];
-        break;
-    case DIVIDE:
-        if (ptr_str[operand] == 0 || accum == 0) {
-            sc_regSet(DE, 1);
-            break;
+        accumulator -= value;
+    } else if (command == 0x32) {
+        if (value == 0x0 || accumulator == 0x0) {
+            sc_regSet(ZERO_DEL, 1);
+            return 1;
         }
-        accum /= ptr_str[operand];
-        break;
-    case MUL:
-        if ((accum * ptr_str[operand]) >= 65535) {
-            sc_regSet(OD, 1);
-            break;
+        accumulator /= value;
+    } else if (command == 0x33) {
+        if ((accumulator * value) >= 0x9999) {
+            sc_regSet(OVERLOAD, 1);
+            return 1;
         }
-        accum *= ptr_str[operand];
-        break;
-    default:
-        return 1;
+        accumulator *= value;
     }
-
     return 0;
 }
 
-int CPU()
-{
-    for (int i = 0; i < N; i++)
-        mem_temp[i] = memory[i];
+// // Using for break the loop
+// struct guard {
+//     int value;
+//     struct guard* next;
+// };
 
+// int temp[5];
+// int temp_n[5];
+// int temp_counter = 0;
+
+// int check_temp()
+// {
+//     struct guard* list = new struct guard;
+//     list->value = temp[0];
+//     list->next = NULL;
+//     struct guard* pop = list;
+//     int count = 1;
+//     for (int i = 1; i < temp_counter; i++) {
+//         pop = list;
+//         do {
+//             if (temp[i] == pop->value) {
+//                 break;
+//             }
+//             pop = pop->next;
+//         } while (pop->next);
+//         if (pop) {
+//             count++;
+//         } else {
+//             struct guard* child = new struct guard;
+//             child->next = NULL;
+//             child->value = temp[i];
+//             pop->next = child;
+//         }
+//     }
+//     if (temp_counter - count < 3) {
+//         return 1;
+//     }
+//     return 0;
+// }
+
+int CU()
+{
     int command = 0;
     int operand = 0;
-
-    if (sc_commandDecode(mem_temp[instructionCounter], &command, &operand)) {
+    int value = 0;
+    if (sc_commandDecode(memory[instructionCounter], &command, &operand)) {
         sc_regSet(IGNR_PULSES, 1);
+        sc_regSet(WRONG_COMMAND, 1);
         return 1;
     }
-
-    int value = 0;
-
-    if (command > 33 || command < 30) {
-        if (command == 10) {
+    // temp[temp_counter] = memory[instructionCounter];
+    // temp_counter++;
+    // if (temp_counter == 5) {
+    //     if (check_temp()) {
+    //         sc_regSet(IGNR_PULSES, 1);
+    //         return 2;
+    //     }
+    // }
+    if (command > 0x33 || command < 0x30) {
+        if (command == 0x10) { // READ
+            ENTER();
+        } else if (command == 0x11) { // WRITE
             mt_gotoXY(26, 1);
-            cout >> "> ";
-            int tmp = 0;
-            scanf("%d", &tmp);
-            printf("\n");
-            if (tmp > 65535) {
-                sc_regSet(OD, 1);
-                break;
+            sc_memoryGet(operand, &value);
+            printf("%x\n", value);
+            sleep(2);
+            clean_input();
+        } else if (command == 0x20) { // LOAD
+            sc_memoryGet(operand, &accumulator);
+        } else if (command == 0x21) { // STORE
+            if (!sc_commandEncode((accumulator >> 7) & 0x7F, accumulator & 0x7F, &value))
+                sc_memorySet(operand, value);
+        } else if (command == 0x40) { // JUMP
+            if (operand > 99) {
+                sc_regSet(OUT_OF_BORDER, 1);
+            } else {
+                instructionCounter = operand - 1;
             }
-            ptr_str[operand] = tmp;
-            incrementNumStrForLogs();
-            break;
-        case WRITE:
-            mt_gotoXY(26 + numStrForLogs, 1);
-            printf("%d\n", ptr_str[operand]);
-            incrementNumStrForLogs();
-            break;
-        case LOAD:
-            accum = ptr_str[operand];
-            break;
-        case STORE:
-            ptr_str[operand] = accum;
-            break;
-
-        case JUMP:
-            if (operand > 99 || operand < 0) {
-                sc_regSet(EG, 1);
-                break;
+        } else if (command == 0x41) { // JNEG
+            if (accumulator < 0) {
+                instructionCounter = operand - 1;
             }
-            instCount = operand;
-            instCount--;
-            break;
-        case JNEG:
-            if (accum < 0) {
-                instCount = operand;
-                instCount--;
+        } else if (command == 0x42) { // JZ
+            if (accumulator == 0) {
+                instructionCounter = operand - 1;
             }
-            break;
-        case JZ:
-            if (accum == 0) {
-                instCount = operand;
-                instCount--;
-            }
-            break;
-        case JC:
-            sc_regGet(OD, &value);
-            if (value == 1) {
-                instCount = operand;
-                instCount--;
-            }
-            break;
-        case JB:
-            if (accum > 0) {
-                instCount = operand;
-                instCount--;
-            }
-            break;
-
-        case SET:
-            accum = operand;
-            break;
-
-        case HALT:
+        } else if (command == 0x43) { // HALT
             return 2;
-            break;
+        } else if (command == 0x63) { // RCR
+            value = (operand << 5) & 0b1100000;
+            accumulator = (operand >> 2) | value;
         }
     } else {
         if (ALU(command, operand)) {
             return 1;
         }
     }
-
-    instCount++;
+    instructionCounter++;
 
     return 0;
 }

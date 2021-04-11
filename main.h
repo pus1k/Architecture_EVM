@@ -1,7 +1,7 @@
 #ifndef MAIN_H
 #define MAIN_H
 
-#include "func.h"
+#include "kurs/cpu.h"
 
 // sc_regSet(IGNR_TIMER, 1);
 
@@ -14,7 +14,7 @@ void _init_()
     accumulator = 0;
     for (int i = 0; i < N; i++) {
         int value = 0;
-        value = (commands[(rand() % 12 + 0)] << 7) | (rand() % 0b1111111 + 0);
+        value = (commands[(rand() % 12 + 0)] << 7) | (rand() % 99 + 0);
         sc_memorySet(i, value);
     }
     _print_box_();
@@ -28,6 +28,21 @@ void _timer_(int signo)
     if (instructionCounter < 99 && !value) {
         instructionCounter++;
     }
+    sc_regGet(IGNR_PULSES, &value);
+    if (!value) {
+        while (value == 0) {
+            _print_screen_();
+            value = CU();
+            sleep(1);
+        }
+        if (value == 2) {
+            sc_regSet(IGNR_PULSES, 1);
+            alarm(0);
+        }
+    } else {
+        alarm(0);
+    }
+    _print_screen_();
 }
 
 void _signal_(int signo)
@@ -74,9 +89,11 @@ void _start_prog_()
             ENTER();
         } else if (key == key_run) {
             setitimer(ITIMER_REAL, &nval, &oval);
-            RUN();
         } else if (key == key_step) {
-            STEP();
+            _print_screen_();
+            sc_regGet(IGNR_PULSES, &value);
+            if (!value)
+                CU();
         } else if (key == key_reset) {
             alarm(0);
             raise(SIGUSR1);

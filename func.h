@@ -1,12 +1,14 @@
 #ifndef FUNC_H
 #define FUNC_H
 
+#include "kurs/cpu.h"
 #include "lab2/simple_computer.h"
 #include <signal.h>
 #include <stdio.h>
 #include <sys/time.h>
 
 struct itimerval nval, oval;
+void _print_screen_();
 
 void print_mem(int value, colors fc, colors bc)
 {
@@ -85,30 +87,27 @@ void F6()
     clean_input();
 }
 
-// DO CPU
-void RUN()
-{
-    return;
-}
-void STEP()
-{
-    return;
-}
-
 void ENTER()
 {
     int value = 0, temp = 0;
     mt_gotoXY(26, 1);
     cout << "> ";
+    cin.clear();
     cin >> std::hex >> value;
-    if (!sc_commandEncode((value >> 7) & 0x7F, value & 0x7F, &temp)) {
-        if (sc_memorySet(instructionCounter, temp)) {
-            cout << "Out of memory border!" << endl;
+    cin.clear();
+    if (value < 65535) {
+        if (!sc_commandEncode((value >> 7) & 0x7F, value & 0x7F, &temp)) {
+            if (sc_memorySet(instructionCounter, temp)) {
+                cout << "Out of memory border!" << endl;
+                sleep(1);
+            }
+        } else {
+            cout << "Wrong command!" << endl;
+            sc_regSet(WRONG_COMMAND, 1);
             sleep(1);
         }
     } else {
-        cout << "Value is not correct!" << endl;
-        sleep(1);
+        sc_regSet(OVERLOAD, 1);
     }
     cout << endl;
     clean_input();
@@ -178,8 +177,12 @@ void _print_screen_()
         x++, y = 2;
     }
     int value = 0;
+    mt_gotoXY(3, 64);
+    cout << "                    ";
+    mt_gotoXY(3, 71);
+    printf("%04x", accumulator);
     mt_gotoXY(6, 71);
-    printf("+%04x ", instructionCounter);
+    printf("+%04x", instructionCounter);
     mt_gotoXY(9, 64);
     cout << "                    ";
     mt_gotoXY(9, 69);
