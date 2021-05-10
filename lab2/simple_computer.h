@@ -10,12 +10,11 @@
 using std::cout;
 
 #define N 100
-#define OVERLOAD 0x1 // P
-#define ZERO_DEL 0x2 //  O
-#define OUT_OF_BORDER 0x4 // M
-#define IGNR_PULSES 0x8 // T
-#define WRONG_COMMAND 0x10 // E
-#define IGNR_TIMER 0x20
+#define OVERLOAD 0 // P
+#define ZERO_DEL 1 //  O
+#define OUT_OF_BORDER 2 // M
+#define IGNR_PULSES 3 // T
+#define WRONG_COMMAND 4 // E
 
 int memory[N];
 int flag = 0;
@@ -43,7 +42,7 @@ int sc_regSet(int reg, int value)
 {
     if (reg == OVERLOAD || reg == ZERO_DEL
         || reg == OUT_OF_BORDER || reg == IGNR_PULSES
-        || reg == WRONG_COMMAND || reg == IGNR_TIMER) {
+        || reg == WRONG_COMMAND) {
         if (value == 1) {
             flag |= (1 << reg);
             return 0;
@@ -58,7 +57,7 @@ int sc_regGet(int reg, int* value)
 {
     if (reg == OVERLOAD || reg == ZERO_DEL
         || reg == OUT_OF_BORDER || reg == IGNR_PULSES
-        || reg == WRONG_COMMAND || reg == IGNR_TIMER) {
+        || reg == WRONG_COMMAND) {
         *value = (flag >> reg) & 1;
         return 0;
     }
@@ -139,12 +138,11 @@ int sc_commandDecode(int value, int* command, int* operand)
         temp_command = (value >> 7) & 0x7F;
         temp_operand = value & 0x7F;
         if (!is_command(temp_command)) {
-            if (temp_operand > 0 && temp_operand < 128) {
+            if (temp_operand >= 0 && temp_operand < 128) {
                 *command = temp_command;
                 *operand = temp_operand;
                 return 0;
             }
-            return 1;
         }
     }
     sc_regSet(WRONG_COMMAND, 1);

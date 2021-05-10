@@ -11,25 +11,25 @@ int ALU(int command, int operand)
         return 1;
     }
     if (command == 0x30) {
-        if ((accumulator + value) >= 0x9999) {
+        if ((accumulator + value) >= 0x9999) { // ADD
             sc_regSet(OVERLOAD, 1);
             return 1;
         }
         accumulator += value;
     } else if (command == 0x31) {
-        if ((accumulator - value) < -0x9999) {
+        if ((accumulator - value) < -0x9999) { // SUB
             sc_regSet(OVERLOAD, 1);
             return 1;
         }
         accumulator -= value;
     } else if (command == 0x32) {
-        if (value == 0x0 || accumulator == 0x0) {
+        if (value == 0x0 || accumulator == 0x0) { // DIVIDE
             sc_regSet(ZERO_DEL, 1);
             return 1;
         }
         accumulator /= value;
     } else if (command == 0x33) {
-        if ((accumulator * value) >= 0x9999) {
+        if ((accumulator * value) >= 0x9999) { // MUL
             sc_regSet(OVERLOAD, 1);
             return 1;
         }
@@ -38,78 +38,46 @@ int ALU(int command, int operand)
     return 0;
 }
 
-// // Using for break the loop
-// struct guard {
-//     int value;
-//     struct guard* next;
-// };
-
-// int temp[5];
-// int temp_n[5];
-// int temp_counter = 0;
-
-// int check_temp()
-// {
-//     struct guard* list = new struct guard;
-//     list->value = temp[0];
-//     list->next = NULL;
-//     struct guard* pop = list;
-//     int count = 1;
-//     for (int i = 1; i < temp_counter; i++) {
-//         pop = list;
-//         do {
-//             if (temp[i] == pop->value) {
-//                 break;
-//             }
-//             pop = pop->next;
-//         } while (pop->next);
-//         if (pop) {
-//             count++;
-//         } else {
-//             struct guard* child = new struct guard;
-//             child->next = NULL;
-//             child->value = temp[i];
-//             pop->next = child;
-//         }
-//     }
-//     if (temp_counter - count < 3) {
-//         return 1;
-//     }
-//     return 0;
-// }
-
 int CU()
 {
-    int command = 0;
-    int operand = 0;
-    int value = 0;
+    int command = 0, operand = 0, value = 0;
     if (sc_commandDecode(memory[instructionCounter], &command, &operand)) {
         sc_regSet(IGNR_PULSES, 1);
         sc_regSet(WRONG_COMMAND, 1);
         return 1;
     }
-    // temp[temp_counter] = memory[instructionCounter];
-    // temp_counter++;
-    // if (temp_counter == 5) {
-    //     if (check_temp()) {
-    //         sc_regSet(IGNR_PULSES, 1);
-    //         return 2;
-    //     }
-    // }
     if (command > 0x33 || command < 0x30) {
         if (command == 0x10) { // READ
-            ENTER();
+            int value = 0;
+            mt_gotoXY((operand / 10) + 3, operand % 10 * 6 + 2);
+            cout << "      ";
+            mt_gotoXY((operand / 10) + 3, operand % 10 * 6 + 3);
+            cin.clear();
+            rk_mytermregime(1, 0, 1, 0, 0);
+            cin >> std::hex >> value;
+            rk_mytermrestore();
+            cin.clear();
+            if (value < 0xffff) {
+                sc_memorySet(operand, value);
+            } else {
+                sc_memorySet(operand, 0xffff);
+                sc_regSet(OVERLOAD, 1);
+            }
+            cout << endl;
         } else if (command == 0x11) { // WRITE
             mt_gotoXY(26, 1);
             sc_memoryGet(operand, &value);
             printf("%x\n", value);
-            sleep(2);
-            clean_input();
+            sleep(1);
         } else if (command == 0x20) { // LOAD
             sc_memoryGet(operand, &accumulator);
         } else if (command == 0x21) { // STORE
-            if (!sc_commandEncode((accumulator >> 7) & 0x7F, accumulator & 0x7F, &value))
-                sc_memorySet(operand, value);
+            if (accumulator < 0x9999) {
+                sc_memorySet(operand, accumulator);
+            } else {
+                sc_memorySet(operand, 0x9999);
+                sc_regSet(OVERLOAD, 1);
+            }
         } else if (command == 0x40) { // JUMP
             if (operand > 99) {
                 sc_regSet(OUT_OF_BORDER, 1);
@@ -125,7 +93,8 @@ int CU()
                 instructionCounter = operand - 1;
             }
         } else if (command == 0x43) { // HALT
-            return 2;
+            sc_regSet(IGNR_PULSES, 0);
+            return 1;
         } else if (command == 0x63) { // RCR
             value = (operand << 5) & 0b1100000;
             accumulator = (operand >> 2) | value;
@@ -136,8 +105,6 @@ int CU()
         }
     }
     instructionCounter++;
-
     return 0;
 }
-
 #endif

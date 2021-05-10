@@ -3,8 +3,6 @@
 
 #include "kurs/cpu.h"
 
-// sc_regSet(IGNR_TIMER, 1);
-
 void _init_()
 {
     srand(time(0));
@@ -13,32 +11,18 @@ void _init_()
     instructionCounter = 0;
     accumulator = 0;
     for (int i = 0; i < N; i++) {
-        int value = 0;
-        value = (commands[(rand() % 12 + 0)] << 7) | (rand() % 99 + 0);
-        sc_memorySet(i, value);
+        sc_memorySet(i, (commands[(rand() % 12 + 0)] << 7) | (rand() % 99 + 0));
     }
-    _print_box_();
     _print_once_();
 }
 
 void _timer_(int signo)
 {
     int value = 0;
-    sc_regGet(IGNR_TIMER, &value);
-    if (instructionCounter < 99 && !value) {
-        instructionCounter++;
-    }
     sc_regGet(IGNR_PULSES, &value);
-    if (!value) {
-        while (value == 0) {
-            _print_screen_();
-            value = CU();
-            sleep(1);
-        }
-        if (value == 2) {
-            sc_regSet(IGNR_PULSES, 1);
-            alarm(0);
-        }
+    if (!value && instructionCounter < 100) {
+        _print_screen_();
+        CU();
     } else {
         alarm(0);
     }
@@ -61,47 +45,51 @@ void _start_prog_()
     int value = 0;
     _init_();
     setitimer(ITIMER_REAL, &nval, &oval);
+    sc_regSet(IGNR_PULSES, 1);
     while (key != EXIT) {
         _print_screen_();
-        sc_regGet(IGNR_TIMER, &value);
-        if (!value) {
-            rk_readkey(&key);
-        } else {
-            key = key_reset;
-        }
-        if (key == key_right) {
-            if (instructionCounter < 99)
-                instructionCounter++;
-        } else if (key == key_down) {
-            if (instructionCounter < 90)
-                instructionCounter += 10;
-        } else if (key == key_up) {
-            if (instructionCounter > 9)
-                instructionCounter -= 10;
-        } else if (key == key_left) {
-            if (instructionCounter > 0)
-                instructionCounter--;
-        } else if (key == key_load) {
-            LOAD();
-        } else if (key == key_save) {
-            SAVE();
-        } else if (key == key_enter) {
-            ENTER();
-        } else if (key == key_run) {
-            setitimer(ITIMER_REAL, &nval, &oval);
-        } else if (key == key_step) {
-            _print_screen_();
-            sc_regGet(IGNR_PULSES, &value);
-            if (!value)
+        sc_regGet(IGNR_PULSES, &value);
+        rk_readkey(&key);
+        if (value) {
+            if (key == key_right) {
+                if (instructionCounter < 99)
+                    instructionCounter++;
+            } else if (key == key_down) {
+                if (instructionCounter < 90)
+                    instructionCounter += 10;
+            } else if (key == key_up) {
+                if (instructionCounter > 9)
+                    instructionCounter -= 10;
+            } else if (key == key_left) {
+                if (instructionCounter > 0)
+                    instructionCounter--;
+            } else if (key == key_load) {
+                LOAD();
+            } else if (key == key_save) {
+                SAVE();
+            } else if (key == key_enter) {
+                ENTER();
+            } else if (key == key_run) {
+                setitimer(ITIMER_REAL, &nval, &oval);
+            } else if (key == key_step) {
                 CU();
-        } else if (key == key_reset) {
-            alarm(0);
-            raise(SIGUSR1);
-        } else if (key == key_f5) {
-            F5();
-        } else if (key == key_f6) {
-            F6();
+            } else if (key == key_reset) {
+                setitimer(ITIMER_REAL, &nval, &oval);
+                raise(SIGUSR1);
+            } else if (key == key_f5) {
+                F5();
+            } else if (key == key_f6) {
+                F6();
+            }
+        } else {
+            if (key == key_reset) {
+                setitimer(ITIMER_REAL, &nval, &oval);
+                raise(SIGUSR1);
+            }
+            if (key != EXIT)
+                key = key_other;
         }
     }
+    rk_mytermrestore();
 }
 #endif

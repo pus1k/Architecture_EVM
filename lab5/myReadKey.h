@@ -25,7 +25,6 @@ enum keys {
     key_right,
     key_other,
     key_enter,
-    key_signal,
     EXIT
 };
 
@@ -109,8 +108,6 @@ int rk_readkey(enum keys* key)
         *key = key_reset;
     } else if ((int)buf[0] == 27) {
         *key = EXIT;
-    } else if (buf[0] == 'a') {
-        *key = key_signal;
     } else {
         *key = key_other;
     }
