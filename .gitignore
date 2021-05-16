@@ -2,6 +2,8 @@
 !*.h
 !*.cpp
 !*.txt
+!*.su
+!*.bsc
 !.gitignore
 !.gitkeep
 !lab2/

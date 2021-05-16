@@ -13,5 +13,5 @@ build/main.o: main.cpp
 clear:
 	clear
 clean: 
-	rm -rf tet *.txt build/*.o
+	rm -rf tet sat *.o *.txt build/*.o
 	clear

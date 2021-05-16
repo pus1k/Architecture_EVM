@@ -67,7 +67,7 @@ int CU()
         } else if (command == 0x11) { // WRITE
             mt_gotoXY(26, 1);
             sc_memoryGet(operand, &value);
-            printf("%x\n", value);
+            printf("%x == %d\n", value, value);
             sleep(1);
         } else if (command == 0x20) { // LOAD
             sc_memoryGet(operand, &accumulator);
