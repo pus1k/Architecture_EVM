@@ -38,12 +38,18 @@ void _start_prog_()
 {
     signal(SIGALRM, _timer_);
     signal(SIGUSR1, _signal_);
-    nval.it_interval.tv_sec = 1;
-    nval.it_interval.tv_usec = 0;
     nval.it_value.tv_sec = 1;
     nval.it_value.tv_usec = 0;
+    nval.it_interval.tv_sec = nval.it_value.tv_sec;
+    nval.it_interval.tv_usec = nval.it_value.tv_usec;
     int value = 0;
     _init_();
+    std::ifstream in("load/pop.o", std::ios::binary);
+    if (in.is_open()) {
+        for (int i = 0; i < N; i++) {
+            in.read((char*)&memory[i], sizeof(memory[i]));
+        }
+    }
     setitimer(ITIMER_REAL, &nval, &oval);
     sc_regSet(IGNR_PULSES, 1);
     while (key != EXIT) {
@@ -51,6 +57,7 @@ void _start_prog_()
         sc_regGet(IGNR_PULSES, &value);
         rk_readkey(&key);
         if (value) {
+            alarm(0);
             if (key == key_right) {
                 if (instructionCounter < 99)
                     instructionCounter++;
@@ -70,6 +77,7 @@ void _start_prog_()
             } else if (key == key_enter) {
                 ENTER();
             } else if (key == key_run) {
+                sc_regSet(IGNR_PULSES, 0);
                 setitimer(ITIMER_REAL, &nval, &oval);
             } else if (key == key_step) {
                 CU();
@@ -90,6 +98,5 @@ void _start_prog_()
                 key = key_other;
         }
     }
-    rk_mytermrestore();
 }
 #endif

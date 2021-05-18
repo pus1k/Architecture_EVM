@@ -47,7 +47,7 @@ void SAVE()
     string file_name;
     mt_gotoXY(26, 1);
     printf("File name for save RAM values: ");
-    rk_mytermregime(1, 0, 1, 0, 0);
+    rk_mytermregime(0, 0, 0, 0, 0);
     std::getline(cin, file_name);
     rk_mytermrestore();
     sc_memorySave(file_name);
@@ -59,7 +59,7 @@ void LOAD()
     string file_name;
     mt_gotoXY(26, 1);
     printf("File name for load RAM values: ");
-    rk_mytermregime(1, 0, 1, 0, 0);
+    rk_mytermregime(0, 0, 0, 0, 0);
     std::getline(cin, file_name);
     rk_mytermrestore();
     sc_memoryLoad(file_name);
@@ -76,7 +76,7 @@ void F5()
         sc_memoryGet(instructionCounter, &accumulator);
     } else {
         cout << "\nEnter value for accumulator (0 <--> ffff): ";
-        rk_mytermregime(1, 0, 1, 0, 0);
+        rk_mytermregime(0, 0, 0, 0, 0);
         cin >> std::hex >> accumulator;
         rk_mytermrestore();
     }
@@ -84,7 +84,7 @@ void F5()
 void F6()
 {
     cout << "Enter value for instructionCounter (0 <--> 99): ";
-    rk_mytermregime(1, 0, 1, 0, 0);
+    rk_mytermregime(0, 0, 0, 0, 0);
     cin >> instructionCounter;
     rk_mytermrestore();
     cin.clear();
@@ -102,7 +102,7 @@ void ENTER()
     cout << "      ";
     mt_gotoXY((instructionCounter / 10) + 3, instructionCounter % 10 * 6 + 3);
     cin.clear();
-    rk_mytermregime(1, 0, 1, 0, 0);
+    rk_mytermregime(0, 0, 0, 0, 0);
     cin >> std::hex >> value;
     rk_mytermrestore();
     cin.clear();
@@ -193,7 +193,7 @@ void _print_screen_()
     sc_commandDecode(memory[instructionCounter], &command, &operand);
     printf("+%02x : %02x", command, operand);
     mt_gotoXY(12, 69);
-    cout << "                ";
+    cout << "              ";
     if (!sc_regGet(OVERLOAD, &value) && value) {
         mt_gotoXY(12, 69);
         cout << "P";

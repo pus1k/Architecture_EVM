@@ -54,7 +54,6 @@ int find_pref(char* ar, int arg)
 int get_memory(string line)
 {
     // GETTING ADDRESS
-    cout << " " << (char)(32) << endl;
     if ((int)line[0] < 48 || (int)line[1] < 48 || (int)line[0] > 57 || (int)line[1] > 57) {
         cout << " Wrong number of command" << endl;
         return 1;
@@ -103,7 +102,7 @@ int get_memory(string line)
     cout << "\t\t" << std::setfill('0') << std::setw(2) << address;
     cout << " 0x" << std::setfill('0') << std::setw(2) << std::hex << command << std::dec;
     cout << " " << std::setfill('0') << std::setw(2) << operand << endl;
-    //
+    // //
     return 0;
 }
 
@@ -117,6 +116,7 @@ void asm_to_simp(string in, string out)
         return;
     }
     sc_init();
+    cout << endl;
     while (getline(inf, line)) {
         cout << line;
         if (get_memory(line)) {

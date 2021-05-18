@@ -5,6 +5,7 @@ struct Stek {
     int operand = 0;
     int command = 0;
     int num = 0;
+    int step = -1;
     struct Stek* next = NULL;
 };
 typedef struct Stek Stek;

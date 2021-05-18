@@ -53,7 +53,7 @@ int CU()
             cout << "      ";
             mt_gotoXY((operand / 10) + 3, operand % 10 * 6 + 3);
             cin.clear();
-            rk_mytermregime(1, 0, 1, 0, 0);
+            rk_mytermregime(0, 0, 0, 0, 0);
             cin >> std::hex >> value;
             rk_mytermrestore();
             cin.clear();
@@ -68,7 +68,7 @@ int CU()
             mt_gotoXY(26, 1);
             sc_memoryGet(operand, &value);
             printf("%x == %d\n", value, value);
-            sleep(1);
+            sleep(2);
         } else if (command == 0x20) { // LOAD
             sc_memoryGet(operand, &accumulator);
         } else if (command == 0x21) { // STORE
@@ -93,7 +93,7 @@ int CU()
                 instructionCounter = operand - 1;
             }
         } else if (command == 0x43) { // HALT
-            sc_regSet(IGNR_PULSES, 0);
+            sc_regSet(IGNR_PULSES, 1);
             return 1;
         } else if (command == 0x63) { // RCR
             value = (operand << 5) & 0b1100000;

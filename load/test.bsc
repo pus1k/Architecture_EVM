@@ -1,0 +1,7 @@
+10 INPUT A
+20 LET B = 1
+30 LET D = 1
+40 LET D = D * B
+50 LET B = B + 1
+60 IF B < A GOTO 40
+70 OUTPUT D

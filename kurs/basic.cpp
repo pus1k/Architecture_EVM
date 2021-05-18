@@ -7,10 +7,11 @@
 #include <string.h>
 
 int var[30];
+Stek* constant = _new();
 
 int is_sp(char c)
 {
-    if ((c == ' ') || (c == '\t') || (c == '\0') || (c == '\n'))
+    if ((c == ' ') || (c == '\t') || (c == '\0') || (c == '\n') || (c == ',') || (c == '.'))
         return 1;
     else
         return 0;
@@ -94,7 +95,6 @@ int its_in_var(int a)
         if (var[i] == a)
             return i;
         if (var[i] == 1) {
-            var[i] = a;
             return i;
         }
     }
@@ -108,6 +108,19 @@ int get_len(string str)
     return i + 3;
 }
 
+int find_command_for_GOTO(Stek* head, int addr)
+{
+    if (head) {
+        Stek* ptr = head;
+        while (ptr) {
+            if (ptr->step == addr)
+                return ptr->num;
+            ptr = ptr->next;
+        }
+    }
+    return -1;
+}
+
 void rpn_to_basic(Stek* head, string rpn, int addr, int* additional_num)
 {
     Stek* ptr = last(head);
@@ -119,36 +132,44 @@ void rpn_to_basic(Stek* head, string rpn, int addr, int* additional_num)
         if (isalpha(rpn[i])) {
             int temp = its_in_var(rpn[i]);
             if (temp != 30) {
-                arr = push(arr, 99 - temp);
+                arr = push(arr, (char)(99 - temp));
+            }
+        } else if (isdigit(rpn[i])) {
+            int value = get_num(rpn, &i);
+            int temp = its_in_var((-1) * value);
+            if (temp != 30) {
+                if (var[temp] == 1) {
+                    var[temp] = (-1) * value;
+                    Stek* const1 = _new(99 - temp, value, 0);
+                    add(constant, const1);
+                }
+                arr = push(arr, (char)(99 - temp));
             }
         } else if ((rpn[i] == '+') || (rpn[i] == '-') || (rpn[i] == '*') || (rpn[i] == '/')) {
             if (arr->next) {
                 int num = 0;
+                int first = stack_pop(&arr);
+                int second = stack_pop(&arr);
                 if (ptr->command == 5) {
-                    int first = (int)stack_pop(&arr);
-                    int second = (int)stack_pop(&(arr->next));
-                    ptr->command = 0x20, ptr->operand = first;
-                    Stek* node1 = _new(ptr->num + 1, 0x21, addr);
-                    Stek* node2 = _new(node1->num + 1);
-                    ptr->next = node1, node1->next = node2;
+                    ptr->command = 0x20, ptr->operand = second;
+                    Stek* node2 = _new(ptr->num + 1);
+                    ptr->next = node2;
                     if (rpn[i] == '+') {
                         node2->command = 0x30;
                     } else if (rpn[i] == '-') {
                         node2->command = 0x31;
-                    } else if (rpn[i] == '*') {
-                        node2->command = 0x32;
                     } else if (rpn[i] == '/') {
+                        node2->command = 0x32;
+                    } else if (rpn[i] == '*') {
                         node2->command = 0x33;
                     }
                     num = node2->num + 1;
-                    node2->operand = second;
+                    node2->operand = first;
+                    (*additional_num) += 2;
                 } else {
-                    int first = stack_pop(&arr);
-                    int second = stack_pop(&arr->next);
-                    Stek* node1 = _new(ptr->num + 1, 0x20, first);
-                    Stek* node2 = _new(node1->num + 1, 0x21, addr);
-                    Stek* node3 = _new(node2->num + 1);
-                    ptr->next = node1, node1->next = node2, node2->next = node3;
+                    Stek* node1 = _new(ptr->num + 1, 0x20, second);
+                    Stek* node3 = _new(node1->num + 1);
+                    ptr->next = node1, node1->next = node3;
                     if (rpn[i] == '+') {
                         node3->command = 0x30;
                     } else if (rpn[i] == '-') {
@@ -158,12 +179,14 @@ void rpn_to_basic(Stek* head, string rpn, int addr, int* additional_num)
                     } else if (rpn[i] == '/') {
                         node3->command = 0x33;
                     }
-                    node3->operand = second;
                     num = node3->num + 1;
+                    node3->operand = first;
+                    (*additional_num) += 3;
                 }
+                ptr = last(head);
                 Stek* node4 = _new(num, 0x21, addr);
                 ptr->next = node4;
-                ptr = last(head);
+                ptr = ptr->next;
             }
         }
     }
@@ -179,36 +202,46 @@ void to_asm(Stek* head, string where)
     while (head) {
         if (head->command != 0) {
             if (head->command == 0x10)
-                command = "READ  ";
+                command = "READ   ";
             else if (head->command == 0x11)
-                command = "WRITE ";
+                command = "WRITE  ";
             else if (head->command == 0x20)
-                command = "LOAD  ";
+                command = "LOAD   ";
             else if (head->command == 0x21)
-                command = "STORE ";
+                command = "STORE  ";
             else if (head->command == 0x30)
-                command = "ADD   ";
+                command = "ADD    ";
             else if (head->command == 0x31)
-                command = "SUB   ";
+                command = "SUB    ";
             else if (head->command == 0x32)
-                command = "DIVIDE";
+                command = "DIVIDE ";
             else if (head->command == 0x33)
-                command = "MUL   ";
+                command = "MUL    ";
             else if (head->command == 0x40)
-                command = "JUMP  ";
+                command = "JUMP   ";
             else if (head->command == 0x41)
-                command = "JNEG  ";
+                command = "JNEG   ";
             else if (head->command == 0x42)
-                command = "JZ    ";
+                command = "JZ     ";
             else if (head->command == 0x43)
-                command = "HALT  ";
+                command = "HALT   ";
             else if (head->command == 0x63)
-                command = "RCR   ";
-            OUT << std::setfill('0') << std::setw(2) << head->num - 1 << ' ' << command << head->operand << ' '
-                << "\n";
-            // cout << std::setfill('0') << std::setw(2) << head->num - 1 << " " << command << head->operand << endl;
+                command = "RCR    ";
+            else if (head->command == -1) {
+                command = "=     +";
+                OUT << std::setfill('0') << std::setw(2) << head->num << ' ' << command << head->operand << ' ' << endl;
+                // cout << std::setfill('0') << std::setw(2) << head->num << " " << command << head->operand << endl;
+                head = head->next;
+                continue;
+            }
+            OUT << std::setfill('0') << std::setw(2) << head->num << ' ' << command << std::setfill('0') << std::setw(2) << head->operand << ' ' << endl;
+            // cout << std::setfill('0') << std::setw(2) << head->num << " " << command << std::setfill('0') << std::setw(2) << head->operand << endl;
         }
         head = head->next;
+    }
+    while (constant) {
+        OUT << std::setfill('0') << std::setw(2) << constant->num << ' ' << "=     +" << constant->command << ' ' << endl;
+        constant = constant->next;
     }
 }
 int translator(string from, string where)
@@ -221,10 +254,10 @@ int translator(string from, string where)
     string line;
     Stek* head = _new();
     Stek* node;
+
     int ind = 0;
     int additional_num = 0;
     while (getline(IN, line)) {
-        // cout << line << endl;
         if ((ind = get_full_string(head, line)) == 1) {
             return 1;
         }
@@ -234,10 +267,14 @@ int translator(string from, string where)
             oper += line[bib], bib++;
         }
         node = last(head);
+        node->step = node->num;
         node->num += additional_num;
         if (node->command == 0 || node->command == 3) {
             if (node->command == 3) {
                 node->command = 0x43;
+            }
+            if (node->command == 0) {
+                rem(head, node);
             }
             continue;
         }
@@ -257,44 +294,49 @@ int translator(string from, string where)
             }
         } else if (node->command == 4) {
             int operand[2];
-            int len = 4, num = 0;
+            int len = 0, num = 0;
+
             for (int i = 0; i < 2; i++) {
                 if (isdigit(oper[i * len])) {
                     num = get_num(oper, &len);
-                    if (!i)
-                        len += 4;
                     operand[i] = its_in_var((-1) * num);
+                    if (!i)
+                        len += 3;
+                    if (i)
+                        len--;
                 } else {
                     operand[i] = its_in_var((int)oper[i * len]);
+                    if (!i)
+                        len = 4;
+                    else
+                        len++;
                 }
                 if (operand[i] == 30) {
                     cout << "\nSomething wrong with operand!" << endl;
                     return 1;
                 }
-            }
-            node->command = 0x20;
-            Stek* node2 = _new(node->num + 1, 0x31);
-            Stek* node3 = _new(node2->num + 1);
-            Stek* node4 = _new(node3->num + 1, 0x40);
-            additional_num += 3;
-            if (oper[2] == '=') {
-                node->operand = 99 - operand[0], node->next = node2;
-                node2->operand = 99 - operand[1], node2->next = node3;
-                node3->command = 0x42, node3->operand = node3->num + 1, node3->next = node4;
-            } else if (oper[2] == '>') {
-                node->operand = 99 - operand[1], node->next = node2;
-                node2->operand = 99 - operand[0], node2->next = node3;
-                node3->command = 0x41, node3->operand = node3->num + 1, node3->next = node4;
-            } else if (oper[2] == '<') {
-                node->operand = 99 - operand[0], node->next = node2;
-                node2->operand = 99 - operand[1], node2->next = node3;
-                node3->command = 0x41, node3->operand = node3->num + 1, node3->next = node4;
-            } else {
-                cout << "Wrong sign in if!" << endl;
-                return 1;
+                if (var[operand[i]] == 1) {
+                    if (isdigit(oper[i * len])) {
+                        var[operand[i]] = (-1) * num;
+                        Stek* const1 = _new(99 - operand[i], num, 0);
+                        add(constant, const1);
+                        len++;
+                    } else {
+                        var[operand[i]] = oper[i * len];
+                        Stek* node_temp = _new(node->num, node->command, node->operand, node->next);
+                        Stek* node1 = _new(node->num, 0x10, 99 - operand[i]);
+                        rem(head, node);
+                        node = last(head);
+                        node->next = node1, node1->next = node_temp;
+                        additional_num++;
+                        node = last(head);
+                        node->num++;
+                    }
+                }
             }
             len++;
             if (is_sp(oper[len])) {
+                cout << oper << endl;
                 return 1;
             }
             string GOTO;
@@ -304,10 +346,36 @@ int translator(string from, string where)
                 return 1;
             }
             len++;
-            node4->operand = get_num(oper, &len);
+            int addr = get_num(oper, &len) - 1;
+            addr = find_command_for_GOTO(head, addr);
+            if (addr == -1) {
+                cout << "This addr in GOTO is WRONG" << endl;
+                return 1;
+            }
+            node->command = 0x20;
+            Stek* node2 = _new(node->num + 1, 0x31);
+            Stek* node3 = _new(node2->num + 1);
+            additional_num += 2;
+            if (oper[2] == '=') {
+                node->operand = 99 - operand[0], node->next = node2;
+                node2->operand = 99 - operand[1], node2->next = node3;
+                node3->command = 0x42;
+            } else if (oper[2] == '>') {
+                node->operand = 99 - operand[1], node->next = node2;
+                node2->operand = 99 - operand[0], node2->next = node3;
+                node3->command = 0x41;
+            } else if (oper[2] == '<') {
+                node->operand = 99 - operand[0], node->next = node2;
+                node2->operand = 99 - operand[1], node2->next = node3;
+                node3->command = 0x41;
+            } else {
+                cout << "Wrong sign in if!" << endl;
+                return 1;
+            }
+            node3->operand = addr;
         } else if (node->command == 5) {
             if (!isalpha(oper[0])) {
-                cout << "In len arg is not num!" << endl;
+                cout << "In let arg is not num!" << endl;
                 return 1;
             }
             int addr = its_in_var(oper[0]);
@@ -315,21 +383,53 @@ int translator(string from, string where)
                 return 1;
             }
             string rpn;
-            int j = 1;
+            int j = 4;
             while (oper[j] != '\0' && oper[j] != '\n') {
                 rpn += oper[j], j++;
             }
-            string rpn_basic;
-            translate_to_rpn(rpn, &rpn_basic);
-            // cout << rpn_basic << endl;
-            rpn_to_basic(head, rpn_basic, 99 - addr, &additional_num);
+            j = 0;
+            var[addr] = oper[0];
+            if (isdigit(rpn[0])) {
+                int one_value = get_num(rpn, &j);
+                if (rpn[j] == '\0' || rpn[j] == '\n') {
+                    int one_ind = its_in_var(-1 * one_value);
+                    if (one_ind != 30) {
+                        if (var[one_ind] == 1) {
+                            var[one_ind] = (-1) * one_value;
+                            Stek* const1 = _new(99 - one_ind, one_value, 0);
+                            add(constant, const1);
+                        }
+                        node->command = 0x20, node->operand = 99 - one_ind;
+                        Stek* node1 = _new(node->num + 1, 0x21, 99 - addr);
+                        node->next = node1;
+                        additional_num++;
+                    }
+                } else {
+                    string rpn_basic;
+                    translate_to_rpn(rpn, &rpn_basic);
+                    rpn_to_basic(head, rpn_basic, 99 - addr, &additional_num);
+                }
+            } else if (isalpha(rpn[0])) {
+                if (rpn[1] == '\0' || rpn[1] == '\n') {
+                    int one_ind = its_in_var(rpn[0]);
+                    node->command = 0x20, node->operand = 99 - one_ind;
+                    Stek* node1 = _new(node->num + 1, 0x21, 99 - addr);
+                    node->next = node1;
+                    additional_num++;
+                } else {
+                    string rpn_basic;
+                    translate_to_rpn(rpn, &rpn_basic);
+                    rpn_to_basic(head, rpn_basic, 99 - addr, &additional_num);
+                }
+            } else {
+                string rpn_basic;
+                translate_to_rpn(rpn, &rpn_basic);
+                rpn_to_basic(head, rpn_basic, 99 - addr, &additional_num);
+            }
         }
     }
     pop(&head);
-    // while (head) {
-    //     cout << head->num << " " << head->command << " " << head->operand << endl;
-    //     head = head->next;
-    // }
+    pop(&constant);
     to_asm(head, where);
     return 0;
 }
@@ -344,8 +444,8 @@ int main(int argc, char* argv[])
     for (int i = 0; i < 30; i++) {
         var[i] = 1;
     }
-    translator(argv[1], "basic.o");
+    translator(argv[1], "load/basic.su");
     sc_init();
-    asm_to_simp("basic.o", argv[2]);
+    asm_to_simp("load/basic.su", argv[2]);
     return 0;
 }
