@@ -11,7 +11,9 @@ void _init_()
     instructionCounter = 0;
     accumulator = 0;
     for (int i = 0; i < N; i++) {
-        sc_memorySet(i, (commands[(rand() % 12 + 0)] << 7) | (rand() % 99 + 0));
+        // Enter that for random commands
+        // (commands[(rand() % 12 + 0)] << 7) | (rand() % 99 + 0)
+        sc_memorySet(i, 0);
     }
     _print_once_();
 }
@@ -22,7 +24,11 @@ void _timer_(int signo)
     sc_regGet(IGNR_PULSES, &value);
     if (!value && instructionCounter < 100) {
         _print_screen_();
-        CU();
+        while (!CU()) {
+            _print_screen_();
+            usleep(200000);
+        }
+
     } else {
         alarm(0);
     }
@@ -52,6 +58,7 @@ void _start_prog_()
     }
     setitimer(ITIMER_REAL, &nval, &oval);
     sc_regSet(IGNR_PULSES, 1);
+    rk_mytermsave();
     while (key != EXIT) {
         _print_screen_();
         sc_regGet(IGNR_PULSES, &value);

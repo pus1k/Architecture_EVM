@@ -6,7 +6,6 @@ int main()
     if (mt_getscreensize(&rows, &cols) == 0) {
         if (rows >= 26 && cols >= 84) {
             _start_prog_();
-            rk_mytermregime(0, 0, 0, 0, 0);
         } else {
             mt_gotoXY(abs(rows / 2) + 1, abs(cols / 2) - 15);
             cout << "Make the terminal window bigger." << endl;

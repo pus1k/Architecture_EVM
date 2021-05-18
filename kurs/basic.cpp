@@ -174,9 +174,9 @@ void rpn_to_basic(Stek* head, string rpn, int addr, int* additional_num)
                         node3->command = 0x30;
                     } else if (rpn[i] == '-') {
                         node3->command = 0x31;
-                    } else if (rpn[i] == '*') {
-                        node3->command = 0x32;
                     } else if (rpn[i] == '/') {
+                        node3->command = 0x32;
+                    } else if (rpn[i] == '*') {
                         node3->command = 0x33;
                     }
                     num = node3->num + 1;
@@ -187,6 +187,7 @@ void rpn_to_basic(Stek* head, string rpn, int addr, int* additional_num)
                 Stek* node4 = _new(num, 0x21, addr);
                 ptr->next = node4;
                 ptr = ptr->next;
+                arr = push(arr, (char)(addr));
             }
         }
     }
@@ -227,15 +228,7 @@ void to_asm(Stek* head, string where)
                 command = "HALT   ";
             else if (head->command == 0x63)
                 command = "RCR    ";
-            else if (head->command == -1) {
-                command = "=     +";
-                OUT << std::setfill('0') << std::setw(2) << head->num << ' ' << command << head->operand << ' ' << endl;
-                // cout << std::setfill('0') << std::setw(2) << head->num << " " << command << head->operand << endl;
-                head = head->next;
-                continue;
-            }
             OUT << std::setfill('0') << std::setw(2) << head->num << ' ' << command << std::setfill('0') << std::setw(2) << head->operand << ' ' << endl;
-            // cout << std::setfill('0') << std::setw(2) << head->num << " " << command << std::setfill('0') << std::setw(2) << head->operand << endl;
         }
         head = head->next;
     }
@@ -254,7 +247,6 @@ int translator(string from, string where)
     string line;
     Stek* head = _new();
     Stek* node;
-
     int ind = 0;
     int additional_num = 0;
     while (getline(IN, line)) {

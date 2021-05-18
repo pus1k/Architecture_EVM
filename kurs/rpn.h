@@ -41,14 +41,11 @@ int get_prior(char c)
 void translate_to_rpn(string str, string* out)
 {
     Rpn* opers = NULL;
-
-    for (int i = 0; str[i] != '\0' && str[i] != '\n'; i++) {
-        if (str[i] == ' ' || str[i] == '\t') {
-            continue;
-        } else if (str[i] == ')') {
+    for (int i = 0; i <= (int)str.length(); i += 1) {
+        if (str[i] == ')') {
             while (opers->c != '(')
                 (*out) += stack_pop(&opers), (*out) += ",";
-            stack_pop(&opers), (*out) += ",";
+            stack_pop(&opers);
         } else if (isalpha(str[i])) {
             (*out) += str[i], (*out) += ",";
         } else if (isdigit(str[i])) {
@@ -56,6 +53,7 @@ void translate_to_rpn(string str, string* out)
                 (*out) += str[i];
                 i++;
             }
+            i--;
             (*out) += ",";
         } else if (str[i] == '(') {
             opers = push(opers, str[i]);

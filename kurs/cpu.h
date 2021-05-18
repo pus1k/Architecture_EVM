@@ -11,13 +11,13 @@ int ALU(int command, int operand)
         return 1;
     }
     if (command == 0x30) {
-        if ((accumulator + value) >= 0x9999) { // ADD
+        if ((accumulator + value) >= 0xffff) { // ADD
             sc_regSet(OVERLOAD, 1);
             return 1;
         }
         accumulator += value;
     } else if (command == 0x31) {
-        if ((accumulator - value) < -0x9999) { // SUB
+        if ((accumulator - value) < -0xffff) { // SUB
             sc_regSet(OVERLOAD, 1);
             return 1;
         }
@@ -29,7 +29,7 @@ int ALU(int command, int operand)
         }
         accumulator /= value;
     } else if (command == 0x33) {
-        if ((accumulator * value) >= 0x9999) { // MUL
+        if ((accumulator * value) >= 0xffff) { // MUL
             sc_regSet(OVERLOAD, 1);
             return 1;
         }
@@ -48,14 +48,13 @@ int CU()
     }
     if (command > 0x33 || command < 0x30) {
         if (command == 0x10) { // READ
+            rk_mytermrestore();
             int value = 0;
             mt_gotoXY((operand / 10) + 3, operand % 10 * 6 + 2);
             cout << "      ";
             mt_gotoXY((operand / 10) + 3, operand % 10 * 6 + 3);
             cin.clear();
-            rk_mytermregime(0, 0, 0, 0, 0);
             cin >> std::hex >> value;
-            rk_mytermrestore();
             cin.clear();
             if (value < 0xffff) {
                 sc_memorySet(operand, value);
@@ -64,6 +63,7 @@ int CU()
                 sc_regSet(OVERLOAD, 1);
             }
             cout << endl;
+            rk_mytermregime(1, 0, 1, 1, 1);
         } else if (command == 0x11) { // WRITE
             mt_gotoXY(26, 1);
             sc_memoryGet(operand, &value);
@@ -72,10 +72,10 @@ int CU()
         } else if (command == 0x20) { // LOAD
             sc_memoryGet(operand, &accumulator);
         } else if (command == 0x21) { // STORE
-            if (accumulator < 0x9999) {
+            if (accumulator < 0xffff) {
                 sc_memorySet(operand, accumulator);
             } else {
-                sc_memorySet(operand, 0x9999);
+                sc_memorySet(operand, 0xffff);
                 sc_regSet(OVERLOAD, 1);
             }
         } else if (command == 0x40) { // JUMP
