@@ -5,16 +5,15 @@
 
 void _init_()
 {
-    srand(time(0));
+    // srand(time(0));
     std::system("clear");
     sc_init();
     instructionCounter = 0;
     accumulator = 0;
-    for (int i = 0; i < N; i++) {
-        // Enter that for random commands
-        // (commands[(rand() % 12 + 0)] << 7) | (rand() % 99 + 0)
-        sc_memorySet(i, 0);
-    }
+    // for (int i = 0; i < N; i++) {
+    //     // Enter that for random commands
+    //     sc_memorySet(i, (commands[(rand() % 12 + 0)] << 7) | (rand() % 99 + 0));
+    // }
     _print_once_();
 }
 
@@ -32,7 +31,6 @@ void _timer_(int signo)
     } else {
         alarm(0);
     }
-    _print_screen_();
 }
 
 void _signal_(int signo)

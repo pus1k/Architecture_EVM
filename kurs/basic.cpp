@@ -100,13 +100,13 @@ int its_in_var(int a)
     }
     return 30;
 }
-int get_len(string str)
-{
-    int i;
-    for (i = 0; isdigit(str[i]); i++) {
-    }
-    return i + 3;
-}
+// int get_len(string str)
+// {
+//     int i;
+//     for (i = 0; isdigit(str[i]); i++) {
+//     }
+//     return i + 3;
+// }
 
 int find_command_for_GOTO(Stek* head, int addr)
 {
@@ -132,6 +132,11 @@ void rpn_to_basic(Stek* head, string rpn, int addr, int* additional_num)
         if (isalpha(rpn[i])) {
             int temp = its_in_var(rpn[i]);
             if (temp != 30) {
+                if (var[temp] == 1) {
+                    var[temp] = rpn[i];
+                    Stek* const1 = _new(99 - temp, 0, 0);
+                    add(constant, const1);
+                }
                 arr = push(arr, (char)(99 - temp));
             }
         } else if (isdigit(rpn[i])) {
